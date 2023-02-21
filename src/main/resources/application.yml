@@ -1,0 +1,12 @@
+server:
+  port: 8085
+notification:
+  message: Тестовое сообщение
+  daysBefore: 21
+vk:
+  api:
+    version: 5.131
+    urn: https://api.vk.com/method/
+    accessToken: vk1.a.E66IgTe6alN5nPqO5-exjK1e8blx6zgh8AuT-xAB_b0uDvRnopSeqMi9DS6bzbAYv6G_m0CdBxlCLf38Q-Ue98OOdlCg1BTtqyYzgVCvsx9B9rVfL4ur2zOfK4JQF6N0bQ16QyhIYpAosU9h5FOTxGUGNzwG9KX19kQukDpLDMDyI7v3nlMAPU4MbEkqp_w6sWw3_GbjjeTDoTx0YT2kdQ
+  group:
+    id: lofthouse
