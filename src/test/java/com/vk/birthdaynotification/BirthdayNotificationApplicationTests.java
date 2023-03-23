@@ -1,6 +1,6 @@
 package com.vk.birthdaynotification;
 
-import com.vk.birthdaynotification.model.members.Converter;
+import com.vk.birthdaynotification.model.Converter;
 import com.vk.birthdaynotification.model.members.response.Item;
 import com.vk.birthdaynotification.model.members.response.Members;
 import com.vk.birthdaynotification.model.members.response.Response;

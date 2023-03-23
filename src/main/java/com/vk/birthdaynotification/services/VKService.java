@@ -2,7 +2,7 @@ package com.vk.birthdaynotification.services;
 
 import com.vk.birthdaynotification.client.VKClient;
 
-import com.vk.birthdaynotification.model.members.Converter;
+import com.vk.birthdaynotification.model.Converter;
 import com.vk.birthdaynotification.model.members.response.Members;
 import com.vk.birthdaynotification.model.members.response.Item;
 import org.springframework.beans.factory.annotation.Autowired;
