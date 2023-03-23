@@ -2,12 +2,16 @@ package com.vk.birthdaynotification.services;
 
 import com.vk.birthdaynotification.client.VKClient;
 
-import com.vk.birthdaynotification.dto.members.response.GetMembers;
-import com.vk.birthdaynotification.dto.members.response.Item;
+import com.vk.birthdaynotification.model.members.Converter;
+import com.vk.birthdaynotification.model.members.response.Members;
+import com.vk.birthdaynotification.model.members.response.Item;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
+import java.time.OffsetDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -35,7 +39,7 @@ public class VKService {
         this.vkClient = vkClient;
     }
 
-    public GetMembers getMembers() {
+    public Members getMembers() {
         return vkClient.getMembers(
                 groupId,
                 accessToken,
@@ -44,26 +48,21 @@ public class VKService {
         );
     }
 
-    public List<Item> sortedMembersToBirthDate(GetMembers members) {
-        Calendar dateNow = Calendar.getInstance();
-        Calendar birthday = Calendar.getInstance();
-        dateNow.add(Calendar.DATE, daysBeforeBirthday);
-        int dayOfMonth = dateNow.get(Calendar.DAY_OF_MONTH);
-        int month = dateNow.get(Calendar.MONTH);
+    public List<Item> sortedMembersToBirthDate(Members members) {
         List<Item> membersForSendingNotification = new ArrayList<>();
 
         for (Item member : members.getResponse().getItems().stream().filter(i -> i.getBdate() != null).collect(Collectors.toList())) {
-            birthday.setTime(member.getBdate());
-            if (dayOfMonth == birthday.get(Calendar.DAY_OF_MONTH) && month == birthday.get(Calendar.MONTH)) {
+            OffsetDateTime offsetDateTime = Converter.parseDateTimeString(member.getBdate());
+            if (LocalDate.now().plusDays(daysBeforeBirthday).equals(offsetDateTime.toLocalDate())) {
                 membersForSendingNotification.add(member);
             }
         }
         return membersForSendingNotification;
     }
 
-    public String sendMessageToUsers(List<Item> users) {
+    public ResponseEntity<String> sendMessageToUsers(List<Item> users) {
         return vkClient.sendMessages(
-                users.stream().map(Item::getID).collect(Collectors.toList()),
+                users.stream().map(Item::getId).collect(Collectors.toList()),
                 ((int) (Math.random() * 2147483647)),
                 accessToken,
                 message,

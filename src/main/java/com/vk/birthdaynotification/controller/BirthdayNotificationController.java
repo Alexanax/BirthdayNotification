@@ -1,13 +1,14 @@
 package com.vk.birthdaynotification.controller;
 
-import com.vk.birthdaynotification.dto.members.response.GetMembers;
-import com.vk.birthdaynotification.dto.members.response.Item;
+import com.vk.birthdaynotification.model.members.response.Members;
+import com.vk.birthdaynotification.model.members.response.Item;
 import com.vk.birthdaynotification.services.VKService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Controller;
 
 import java.util.List;
+import java.util.Objects;
 
 @Controller
 public class BirthdayNotificationController {
@@ -18,10 +19,10 @@ public class BirthdayNotificationController {
         this.vkService = vkService;
     }
 
-    @Scheduled(cron = "0 12 * * 1-7")
+    @Scheduled(cron = "* 0 18 * * 0-6")
     public void sendNotificationBeforeBirthday() {
-        GetMembers members = vkService.getMembers();
-        List<Item> memberForNotification = vkService.sortedMembersToBirthDate(members);
+        Members members = vkService.getMembers();
+        List<Item> memberForNotification = vkService.sortedMembersToBirthDate(Objects.requireNonNull(members));
         vkService.sendMessageToUsers(memberForNotification);
     }
 }
