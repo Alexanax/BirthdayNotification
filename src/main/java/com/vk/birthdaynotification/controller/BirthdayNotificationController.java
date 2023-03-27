@@ -24,5 +24,6 @@ public class BirthdayNotificationController {
         Members members = vkService.getMembers();
         List<Item> memberForNotification = vkService.sortedMembersToBirthDate(Objects.requireNonNull(members));
         vkService.sendMessageToUsers(memberForNotification);
+        System.out.println("Сообщение отправлено пользавателю");
     }
 }

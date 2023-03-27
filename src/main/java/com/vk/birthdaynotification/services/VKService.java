@@ -57,6 +57,7 @@ public class VKService {
                 membersForSendingNotification.add(member);
             }
         }
+        System.out.println("Отобраны пользователи для отправки уведомления : " + membersForSendingNotification);
         return membersForSendingNotification;
     }
 

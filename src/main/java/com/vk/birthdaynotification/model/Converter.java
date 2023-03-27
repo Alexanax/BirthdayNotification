@@ -13,8 +13,6 @@ import java.time.format.DateTimeFormatterBuilder;
 import java.time.temporal.ChronoField;
 
 public class Converter {
-    // Date-time helpers
-
     private static final DateTimeFormatter DATE_TIME_FORMATTER = new DateTimeFormatterBuilder()
             .appendOptional(DateTimeFormatter.ISO_DATE_TIME)
             .appendOptional(DateTimeFormatter.ISO_OFFSET_DATE_TIME)
@@ -25,12 +23,21 @@ public class Converter {
             .appendOptional(DateTimeFormatter.ofPattern("dd.MM.yyyy"))
             .appendOptional(DateTimeFormatter.ofPattern("d.MM.yyyy"))
             .appendOptional(DateTimeFormatter.ofPattern("d.M.yyyy"))
+            .appendOptional(DateTimeFormatter.ofPattern("dd.M.yyyy"))
+            .appendOptional(DateTimeFormatter.ofPattern("dd.MM.yy"))
             .appendOptional(DateTimeFormatter.ofPattern("dd.MM"))
+            .appendOptional(DateTimeFormatter.ofPattern("d.MM"))
+            .appendOptional(DateTimeFormatter.ofPattern("d.M"))
             .toFormatter()
             .withZone(ZoneOffset.UTC);
 
     public static OffsetDateTime parseDateTimeString(String str) {
-        LocalDate date = LocalDate.parse(str, DATE_TIME_FORMATTER);
+        LocalDate date;
+        if (str.matches("[0-9]{1,2}.[0-9]{1,2}")) {
+            date = LocalDate.parse(str.concat(".").concat(Year.now().toString()), DATE_TIME_FORMATTER);
+        } else {
+            date = LocalDate.parse(str, DATE_TIME_FORMATTER);
+        }
         return date.atStartOfDay(ZoneId.systemDefault()).toOffsetDateTime();
     }
 
