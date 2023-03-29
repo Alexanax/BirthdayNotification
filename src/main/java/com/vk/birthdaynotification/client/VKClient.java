@@ -2,8 +2,8 @@ package com.vk.birthdaynotification.client;
 
 import com.vk.birthdaynotification.config.FeignConfig;
 import com.vk.birthdaynotification.model.members.response.Members;
+import com.vk.birthdaynotification.model.sendmessage.response.SendMessage;
 import org.springframework.cloud.openfeign.FeignClient;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -23,7 +23,7 @@ public interface VKClient {
             @RequestParam("v") String version);
 
     @RequestMapping(method = RequestMethod.POST, value = "messages.send")
-    ResponseEntity<String> sendMessages(
+    SendMessage sendMessages(
             @RequestParam("user_ids") List<Long> userIds,
             @RequestParam("random_id") Integer randomId,
             @RequestParam("access_token") String accessToken,

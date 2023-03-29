@@ -4,6 +4,7 @@ import com.vk.birthdaynotification.model.Converter;
 import com.vk.birthdaynotification.model.members.response.Item;
 import com.vk.birthdaynotification.model.members.response.Members;
 import com.vk.birthdaynotification.model.members.response.Response;
+import com.vk.birthdaynotification.model.sendmessage.response.SendMessage;
 import com.vk.birthdaynotification.services.VKService;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -11,13 +12,10 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.http.ResponseEntity;
-
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 import java.util.stream.Collectors;
 
 @SpringBootTest
@@ -40,9 +38,10 @@ class BirthdayNotificationApplicationTests {
         item.setBdate("13.2");
         List<Item> items = new ArrayList<>();
         items.add(item);
-        ResponseEntity<String> response = vkService.sendMessageToUsers(items);
-        System.out.println(response.getBody());
-        Assertions.assertFalse(Objects.requireNonNull(response.getBody()).contains("error"));
+        SendMessage response = vkService.sendMessageToUsers(items);
+        System.out.println(response);
+        Assertions.assertNotNull(response);
+        Assertions.assertFalse(response.getResponse().stream().anyMatch(r -> r.getError() != null));
     }
 
 
@@ -91,10 +90,10 @@ class BirthdayNotificationApplicationTests {
             "30.10, 2023-10-30T00:00+03:00",
             "3.1.2023, 2023-01-03T00:00+03:00",
             "30.10.23, 2023-10-30T00:00+03:00"
-    }, ignoreLeadingAndTrailingWhitespace = true)
+    })
     void parseDate(String date, String expectedDate) {
         OffsetDateTime offsetDateTime = Converter.parseDateTimeString(date);
         System.out.println(offsetDateTime);
-		Assertions.assertEquals(expectedDate, offsetDateTime.toString());
+        Assertions.assertEquals(expectedDate, offsetDateTime.toString());
     }
 }
