@@ -19,7 +19,7 @@ public class BirthdayNotificationController {
         this.vkService = vkService;
     }
 
-    @Scheduled(cron = "* 0 18 * * 0-6")
+    @Scheduled(cron = "0 0 18 * * 0-6")
     public void sendNotificationBeforeBirthday(){
         Members members = vkService.getMembers();
         List<Item> memberForNotification = vkService.sortedMembersToBirthDate(Objects.requireNonNull(members));
