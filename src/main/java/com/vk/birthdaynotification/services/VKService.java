@@ -2,22 +2,23 @@ package com.vk.birthdaynotification.services;
 
 import com.vk.birthdaynotification.client.VKClient;
 
-import com.vk.birthdaynotification.model.Converter;
 import com.vk.birthdaynotification.model.members.response.Members;
 import com.vk.birthdaynotification.model.members.response.Item;
-import com.vk.birthdaynotification.model.sendmessage.response.SendMessage;
+import com.vk.birthdaynotification.model.messages.conversations.response.Profile;
+import com.vk.birthdaynotification.model.messages.conversations.response.ResponseConversation;
+import com.vk.birthdaynotification.model.messages.sendmessage.response.SendMessage;
+import com.vk.birthdaynotification.utils.Utils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDate;
-import java.time.OffsetDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
 public class VKService {
-    private final VKClient vkClient;
+    private VKClient vkClient;
+    private Utils utils;
 
     @Value("${vk.group.id}")
     private String groupId;
@@ -28,15 +29,13 @@ public class VKService {
     @Value("${vk.api.version}")
     private String version;
 
-    @Value("${notification.daysBefore}")
-    private Integer daysBeforeBirthday;
-
     @Value("${notification.message}")
     private String message;
 
     @Autowired
-    public VKService(VKClient vkClient) {
+    public VKService(VKClient vkClient, Utils utils) {
         this.vkClient = vkClient;
+        this.utils = utils;
     }
 
     public Members getMembers() {
@@ -48,38 +47,54 @@ public class VKService {
         );
     }
 
-    public List<Item> sortedMembersToBirthDate(Members members) {
-        List<Item> membersForSendingNotification = new ArrayList<>();
-
-        for (Item member : members.getResponse().getItems().stream().filter(i -> i.getBdate() != null).collect(Collectors.toList())) {
-            OffsetDateTime offsetDateTime = Converter.parseDateTimeString(member.getBdate());
-            if (LocalDate.now().plusDays(daysBeforeBirthday).equals(offsetDateTime.toLocalDate())) {
-                membersForSendingNotification.add(member);
-            }
-        }
-        System.out.println("Отобраны пользователи для отправки уведомления : " + membersForSendingNotification);
-        return membersForSendingNotification;
-    }
-
-    public SendMessage sendMessageToUsers(List<Item> usersForSendingMessage) {
+    public SendMessage sendMessageToUsersMembers(List<Item> usersForSendingMessage) {
         var messageResponse = vkClient.sendMessages(
-                getIdsUsers(usersForSendingMessage),
-                getRandomId(),
+                Utils.getIdsUsersFromItem(usersForSendingMessage),
+                Utils.getRandomId(),
                 accessToken,
                 message,
                 version
         );
-        if (messageHasError(messageResponse)) {
-            System.out.println("Не смог отправить уведомление пользователю");
+        if (Utils.messageHasError(messageResponse)) {
             alertAdmin(usersForSendingMessage);
+        } else {
+            System.out.println("В попытке отправить сообщения пользователям вернулось ответное сообщение " + messageResponse);
         }
         return messageResponse;
+    }
+
+    public SendMessage sendMessageToUsersFromConversations(List<Profile> usersForSendingMessage) {
+        var messageResponse = vkClient.sendMessages(
+                Utils.getIdsUsersFromProfile(usersForSendingMessage),
+                Utils.getRandomId(),
+                accessToken,
+                message,
+                version
+        );
+        if (Utils.messageHasError(messageResponse)) {
+            System.out.println("В попытке отправить сообщения пользователям вернулось ответное сообщение " + messageResponse);
+        }
+        return messageResponse;
+    }
+
+    public ResponseConversation getConversations() {
+        return vkClient.getConversations(
+                null,
+                null,
+                null,
+                1,
+                null,
+                "bdate",
+                null,
+                accessToken,
+                version
+        );
     }
 
     private void alertAdmin(List<Item> usersWhoHaveNotReceivedMessage) {
         vkClient.sendMessages(
                 List.of(60528638L),
-                getRandomId(),
+                Utils.getRandomId(),
                 accessToken,
                 "Сообщение не доставлено пользователям : " +
                         usersWhoHaveNotReceivedMessage.stream().map(item -> "\n" + item.getLastName() + " "
@@ -89,17 +104,5 @@ public class VKService {
                 version
         );
         System.out.println("Отправил сообщение админу о том, что пользователь не получил сообщение");
-    }
-
-    private static boolean messageHasError(SendMessage message) {
-        return message.getResponse().stream().anyMatch(r -> r.getError() == null);
-    }
-
-    private static List<Long> getIdsUsers(List<Item> usersForSendingMessage) {
-        return usersForSendingMessage.stream().map(Item::getId).collect(Collectors.toList());
-    }
-
-    private static Integer getRandomId() {
-        return ((int) (Math.random() * 2147483647));
     }
 }

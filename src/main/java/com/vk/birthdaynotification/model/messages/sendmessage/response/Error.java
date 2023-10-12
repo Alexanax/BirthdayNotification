@@ -1,4 +1,4 @@
-package com.vk.birthdaynotification.model.sendmessage.response;
+package com.vk.birthdaynotification.model.messages.sendmessage.response;
 
 import lombok.Data;
 
